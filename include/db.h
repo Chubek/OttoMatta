@@ -30,6 +30,9 @@ typedef union listtype_u {
     int i;
 } listtype_u;
 
+// get a new listtype based on data type
+listtype_u new_listtype(char const *in, dtype_e dtype);
+
 typedef union {
     int integer;
     char string[10000];
@@ -46,8 +49,9 @@ void parse_db_col_fields(
     char const *in
 );
 
+// stuff for dbcol_s class
 typedef struct {
-    int *ref_counter;
+    int *ref_counter; //reference counter holding number of copies
     dbheader_s header;
     dbcontent_u const *content;
 } dbcol_s;
