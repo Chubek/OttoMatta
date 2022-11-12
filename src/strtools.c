@@ -18,7 +18,8 @@ strt_s *strt_new(char const *in) {
 }
 
 /*
-Makes a copy of the stringtools. Increases reference counter.
+Makes a copy of the stringtools with start and length set. 
+Increases reference counter.
 */
 strt_s *strt_copy(strt_s const *in, size_t start, size_t len){
     strt_s *out = malloc(sizeof(strt_s));
@@ -49,7 +50,6 @@ void strt_free(strt_s *in){
 /*
 Use regex from Glib to split the string into chunks. Returns a list object.
 */
-
 strtlist_s strt_split (strt_s const *in, gchar const *start_pattern){
     if (!in->data) return (strtlist_s){ };
     strt_s **out=malloc(sizeof(strt_s*));
