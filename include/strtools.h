@@ -22,3 +22,6 @@ typedef struct {
 strtlist_s strt_split(strt_s const *in, gchar const *start_pattern);
 void strtlist_free(strtlist_s in);
 
+
+#define     IS_SPACE(c)        ((c == 32) ? 1 : 0)
+#define     IS_QUOTE(c)         ((c == 34) ? 1 : 0)
