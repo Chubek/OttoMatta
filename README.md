@@ -61,10 +61,11 @@ To express this states in this form:
 #melted_expired_expr
 
 Init: CandyArrived;
-LABEL_1: Follows Init -> CandySold RET -1 | CandyStolen RET -2;
-LABEL_2: Follows LABEL_1 -> CandyMelted (30?) RET 0;
-LABEL_3: Follows LABEL_1 -> CandyExpired (NOT) RET 1;
-LABEL_4: Follows LABEL_2, LABEL_3 -> CandyEaten RET 2;
+LABEL_1_1: Follows Init, ORs LABEL_1_2 -> CandySold RET -1; 
+LABEL_1_2: Follows Init, ORs LABEL_1_1 -> CandyStolen RET -2;
+LABEL_2_1: Follows Init -> CandyMelted (30?) RET 0;
+LABEL_2_2: Follows Init -> CandyExpired (NOT) RET 1;
+LABEL_4: Results LABEL_1_1, LABEL_1_2, LABEL_2_1, LABEL_2_2 -> CandyEaten RET 2;
 ```
 
 In this expression:
@@ -112,4 +113,41 @@ But how do we trigger these events? A `Trigger` can contain datafields which can
 2- Conditional: using a Python script
 3- CRON: Based on time, once or on a regular basis
 
-To incite an event manually you need to 
+To incite an event manually you need to get into the REPL mode and:
+
+```
+$ INVOKE `melted_expired_expr` (LABEL_4) -> `LABEL_1_2` && `LABEL_3`, { "cust_id": [1, 2, 3, 4] };
+```
+
+To incite an event using a Python script you need to write a script that outputs an string of this format:
+
+```
+`<expr>` (resullt label) -> `condition label 1` && `condition label 2`, { <data to carry > }; ...
+```
+
+Onto the STDOUT. If several outputs are written to the STDOUT, the last one is chosen. If the last one is not valid it will log an error and skip.
+
+A CRON trigger will follow a set time and date or interval to trigger a script. Crons are saved into a file inside the automata folder insite the `cron.json` file. A CRON command may look like this:
+
+```
+"cron_task_1": {
+    "type": "interval",
+    "invoke": {
+        "every": "hour",
+        "amount": 2
+    },
+    "trigger": <trigger string just like above>
+},
+"cron_task_2": {
+    "type": "once",
+    "invoke": {
+        "month": 11,
+        "day": 2,
+        "hour": 3,
+        "min" : 0,
+    },
+    "trigger": ...
+}
+```
+
+As for viewing the data, they are saved in text/json mimetype. To view them you need to use the HTTP API. This API can be used to send commands as well.
