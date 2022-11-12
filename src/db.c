@@ -62,18 +62,62 @@ void dbheader_parse(strtlist_s *in, dbheader_s container[]) {
         char sans_quote[end - start];
         
         size_t j = 0;
-        for (size_t i = start; i < end; i++) {
-            if (!IS_QUOTE(data[i])) {
-                sans_quote[j] = data[i];
+        for (size_t k = start; k < end; k++) {
+            if (!IS_QUOTE(data[k])) {
+                sans_quote[j] = data[k];
 
                 ++j;
             }
         }
 
         dbheader_s curr_header;
-        dbheader_parse_single(data, start, end, &curr_header);
+        dbheader_parse_single(sans_quote, start, end, &curr_header);
         container[i] = curr_header;
     }
 
     strlist_free(in);
+}
+
+
+/*
+ Parse a given string into `Integer[]` or `String[]` type of datafield.
+ */
+listtype_u **parse_list(strtlist_s *in, dtype_e dtype) {
+    listtype_u *all = malloc(in->count * sizeof(listtype_u));
+
+    for (int i = 0; i < in->count; i++) {
+        strt_s *curr_fragment = in[i];
+
+        char *data = *curr_fragment.data;
+        size_t start = *curr_fragment.start;
+        size_t end = *curr_fragment.end;
+
+        char sans_quote[end - start];
+        
+        size_t j = 0;
+        for (size_t k = start; k < end; k++) {
+            if (!IS_QUOTE(data[k])) {
+                sans_quote[j] = data[k];
+
+                ++j;
+            }
+        }
+
+        listtype_u *curr_lst;
+
+        if (dtype == ListChar) {
+            curr_lst = malloc(sizeof(data));
+            strncat(curr_lst->c, data, j);
+        } else if (dtype == ListInt) {
+            char *ptr;
+            
+            long int conv = strtol(data, ptr, strlen(data));
+            curr_lst->i = conv;
+        }
+
+        all[i] = curr_lst;
+    }
+
+    strlist_free(in);
+    return all;
 }

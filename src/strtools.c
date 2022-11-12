@@ -64,11 +64,13 @@ strtlist_s strt_split (strt_s const *in, gchar const *start_pattern){
         GMatchInfo *start_info;
         g_regex_match(start_regex, &remaining->data[remaining->start],
             0, &start_info);
+
         g_match_info_fetch_pos(start_info, 0, &mstart, &mend);
         g_match_info_free(start_info);
 
         if (mend > 0 && mend < remaining->end - remaining->start){
             out = realloc(out, ++outlen * sizeof(strt_s*));
+            
             out[outlen-1] = strt_copy(remaining, mend, remaining->end-mend);
             out[outlen-2]->end = remaining->start + mstart;
             remaining->start += mend;

@@ -11,7 +11,8 @@ dbcol_s: structure for one column.
 
 typedef enum {
     Integer,
-    List,
+    ListInt,
+    ListChar,
     String,
     Datatime,
     Binary,
@@ -21,8 +22,10 @@ typedef enum {
 #define     GET_FIELD_ENUM(s) {                                 \
                 if (strncmp(s, "Integer", 7) == 0) {            \
                     return Integer;                             \
-                } else if (strncmp(s, "List[]", 6) == 0) {      \
-                    return List;                                \
+                } else if (strncmp(s, "Integer[]", 9) == 0) {   \
+                    return ListInt;                             \
+                } else if (strncmp(s, "String[]", 8) == 0) {    \
+                    return ListChar;                            \
                 } else if (strncmp(s, "String", 6) == 0) {      \
                     return String;                              \
                 } else if (strncmp(s, "Datetime", 8) == 0) {    \
@@ -41,20 +44,20 @@ typedef struct  {
 void dbheader_parse_single(char *in, size_t start, size_t end, dbheader_s *header);
 void dbheader_parse(strtlist_s in, dbheader_s container[]);
 
-typedef union listtype_u {
-    char c;
-    int i;
+typedef union {
+    char c[0];
+    long int i;
 } listtype_u;
 
 // get a new listtype based on data type
-listtype_u new_listtype(char const *in, dtype_e dtype);
+listtype_u **parse_list(strtlist_s *in, dtype_e dtype);
 
 typedef union {
-    int integer;
+    long int integer;
     char string[10000];
     time_t datetime;
     char binary[1000000];
-    listtype_u list[100];
+    listtype_u *list;
 } dbcontent_u;
 
 // parse an entire column from the given (in) argument.
@@ -68,8 +71,8 @@ void parse_db_col_fields(
 // stuff for dbcol_s class
 typedef struct {
     int *ref_counter; //reference counter holding number of copies
-    dbheader_s header;
-    dbcontent_u const *content;
+    dbheader_s const *headers;
+    dbcontent_u *content;
 } dbcol_s;
 
 dbcol_s *serialize_db(char *in);
