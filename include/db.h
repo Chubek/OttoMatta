@@ -18,12 +18,28 @@ typedef enum {
 } dbtype_e;
 
 
+#define     GET_FIELD_ENUM(s) {                                 \
+                if (strncmp(s, "Integer", 7) == 0) {            \
+                    return Integer;                             \
+                } else if (strncmp(s, "List[]", 6) == 0) {      \
+                    return List;                                \
+                } else if (strncmp(s, "String", 6) == 0) {      \
+                    return String;                              \
+                } else if (strncmp(s, "Datetime", 8) == 0) {    \
+                    return Datatime;                            \
+                } else if (strncmp(s, "Binary", 6) == 0) {      \
+                    return Binary;                              \
+                }                                               \                      
+            }                                                   
+
+
 typedef struct  {
     char fname[100];
     dbtype_e ftype;
 } dbheader_s;
 
-dbheader_s *dbheader_s_parse(char *in);
+void dbheader_parse_single(char *in, size_t start, size_t end, dbheader_s *header);
+void dbheader_parse(strtlist_s in, dbheader_s container[]);
 
 typedef union listtype_u {
     char c;
